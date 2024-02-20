@@ -17,8 +17,8 @@ async function handle() {
   log('Iniciando script de exportação de descrições de vídeos...');
   const videos = await listAllVideosFromFolder(videosPath);
 
-  // await generateAllFiles(videos);
-  // await saveVideosInfo(videos);
+  await generateAllFiles(videos);
+  await saveVideosInfo(videos);
 }
 
 async function saveVideosInfo(videos: any) {
@@ -84,7 +84,7 @@ async function exportAudioFromVideo(videoPath: string, audioPath: string) {
   function convertVideoToAudio(): Promise<void> {
     return new Promise((resolve, reject) => {
       ffmpeg(videoPath)
-        .setDuration(120)
+        .setDuration(240)
         .output(audioPath)
         .audioBitrate(64) // lower bitrate to reduce file size
         .audioCodec('libmp3lame') // use the 'libmp3lame' codec for faster encoding
@@ -137,7 +137,7 @@ async function getVideoDescription(infoFilePath: string) {
       {
         role: 'system',
         content:
-          'Você é um bot que gera descrições de vídeos. Vou mandar uma parte do vídeo e você me dá um resumo com 30 a 50 palavras. Vamos usar a primeira pessoa do plural para falar sobre o vídeo (nós vamos ver..., nós vamos aprender...). Evite também superlativos (melhor, pior, mais incrível, etc).',
+          'Você é um bot que gera descrições de vídeos. Vou mandar uma parte do vídeo e você me dá um resumo de 30 palavras. Evite superlativos (melhor, pior, mais incrível, etc) e faça a descrição na primeira pessoa do plural para falar sobre o vídeo',
       },
       {
         role: 'user',
