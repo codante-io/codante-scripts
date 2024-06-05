@@ -1,8 +1,8 @@
-import { handle } from "./support-files/createRepo";
+import { handle } from "./lib/createRepo";
 
-const REPO_NAME = 'autenticacao-com-nextauth-e-github';
-const DESCRIPTION = 'O poder - e a facilidade - de um sistema de login com NextAuth.js utilizando o Github para autenticação em uma aplicação Next.js';
-const URL_DO_MINI_PROJETO = 'https://codante.io/mini-projetos/autenticacao-com-nextauth-e-github';
+const REPO_NAME = 'server-actions-no-next-js'; // sem o "mp-"
+const DESCRIPTION = 'Vamos adicionar um formulário de cadastro usando server actions no Next.js! 🚀';
+const URL_DO_MINI_PROJETO = 'https://codante.io/mini-projetos/server-actions-no-next-js';
 
 // Principal
 await handle(`mp-${REPO_NAME}`, DESCRIPTION, URL_DO_MINI_PROJETO);

@@ -6,9 +6,13 @@ import chalk from 'chalk';
 import { json2csv } from 'json-2-csv';
 
 // Iniciar
+const courseDescription =  'Este é um curso em vídeos sobre server actions no Next.js. O curso é uma resolução de um mini projeto proposto.';
+
 const localPath = 'data/video-descriptions/'; // Pasta onde irá ficar os arquivos de áudio e transcrição.
 const videosPath =
-  '/Users/robertotcestari/Movies/Codante/Workshops/Typescript no React/editados/'; // pasta onde estão os vídeos. Recomendado usar nomes como 01.mp4, 02.mp4, 03.mp4, etc.∂
+  '/Users/robertotcestari/Movies/Codante/Mini Projetos/MP0055/editados/'; // pasta onde estão os vídeos. Recomendado usar nomes como 01.mp4, 02.mp4, 03.mp4, etc.∂
+
+let cumulativeInfoString = ''; // string que irá acumular as informações dos vídeos para ser usada no contexto do chatGPT
 
 handle(); // start!
 // /////////////////////////////
@@ -16,6 +20,13 @@ handle(); // start!
 async function handle() {
   log('Iniciando script de exportação de descrições de vídeos...');
   const videos = await listAllVideosFromFolder(videosPath);
+
+  // order videos by name (01.mov, 02.mov, 03.mov, etc)
+  videos.sort((a, b) => {
+    const aName = a.name.split('.')[0];
+    const bName = b.name.split('.')[0];
+    return parseInt(aName) - parseInt(bName);
+  });
 
   await generateAllFiles(videos);
   await saveVideosInfo(videos);
@@ -74,6 +85,10 @@ async function generateAllFiles(videos: any[]) {
     await getAudioTranscription(audioPath, infoFilePath);
     // // finally, we will upload the video description to chatGPT to ask for a summary.
     await getVideoDescription(infoFilePath);
+
+    // add the video description to the cumulativeInfoString
+    const infos = await hfs.json(infoFilePath);
+    cumulativeInfoString += infos.description + ' ';
   }
 }
 
@@ -125,19 +140,41 @@ async function getAudioTranscription(audioPath: string, infoFilePath: string) {
 
 async function getVideoDescription(infoFilePath: string) {
   log('Gerando descrição do vídeo...');
+
   // this function will get the video description from chatGPT
   const openai = new OpenAI();
 
   const infos = await hfs.json(infoFilePath);
   const videoTranscript = infos.text;
 
+  // // chamada para o chatGPT limpar e corrigir a transcrição
+  // log('Corrigindo transcrição do vídeo...');
+  // const sanitizedVideoTranscriptResponse = await openai.chat.completions.create({
+  //   model: 'gpt-4',
+  //   messages: [
+  //     {
+  //       role: 'system',
+  //       content:
+  //         `Você é um bot que corrige a transcrição de um vídeo. Vou mandar uma transcrição do vídeo em texto e você deverá devolver a transcrição corrigida. Procure por erros gramaticais, ou coisas fora do contexto. O contexto do vídeo é: ${courseDescription}`,
+  //     },
+  //     {
+  //       role: 'user',
+  //       content: videoTranscript,
+  //     },
+  //   ],
+  // });
+
+  // infos.sanitizedTranscript = sanitizedVideoTranscriptResponse.choices[0].message.content;
+
+
+
   const description = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4o-2024-05-13',
     messages: [
       {
         role: 'system',
         content:
-          'Você é um bot que gera descrições de vídeos. Vou mandar uma parte do vídeo e você me dá um resumo de 30 palavras. Evite superlativos (melhor, pior, mais incrível, etc) e faça a descrição na primeira pessoa do plural para falar sobre o vídeo',
+          `Você é um bot que gera descrições de vídeos. Vou mandar uma parte da transcrição do vídeo e você me dá um resumo de 30 palavras. Considere que poderá haver erros na transcrição (palavras fora de contexto e erros gramaticais). Evite superlativos (melhor, pior, mais incrível, etc) e faça a descrição na primeira pessoa do plural para falar sobre o vídeo. Também evite começar com "neste vídeo...". Outras informações sobre esse curso: ${courseDescription}. ${cumulativeInfoString ? `Aqui está um contexto dos vídeos anteriores: ${cumulativeInfoString}` : ''} `,
       },
       {
         role: 'user',
@@ -149,7 +186,7 @@ async function getVideoDescription(infoFilePath: string) {
   infos.description = description.choices[0].message.content;
 
   const videoTitle = await openai.chat.completions.create({
-    model: 'gpt-3.5-turbo',
+    model: 'gpt-4o-2024-05-13',
     messages: [
       {
         role: 'system',
