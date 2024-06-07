@@ -5,13 +5,6 @@ import { createChatGPTDescriptions } from './video-descriptions';
 import { getSQLfromVideos } from './vimeo-scripts/getAllVideosFromFolder';
 import { createGithubRepos } from './github-scripts/createGithubRepos';
 
-// O que você quer fazer?
-
-// 1. Add Preset do Codante para uma Pasta do Vimeo
-// 2. Gerar SQL de todos os vídeos de uma pasta do Vimeo para adicionar ao banco de dados
-// 3. Criar repositórios de Mini Projetos
-// 4. Gerar descrições de vídeo com ChatGPT
-
 const questions = [
   {
     type: 'list',
