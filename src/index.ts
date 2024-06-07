@@ -2,6 +2,8 @@
 import inquirer from 'inquirer';
 import { addPresetToVideosInFolder } from './vimeo-scripts/addPresetToVideos';
 import { createChatGPTDescriptions } from './video-descriptions';
+import { getSQLfromVideos } from './vimeo-scripts/getAllVideosFromFolder';
+import { createGithubRepos } from './github-scripts/createGithubRepos';
 
 // O que você quer fazer?
 
@@ -29,10 +31,10 @@ inquirer.prompt(questions).then((answers) => {
       addPresetToVideosInFolder();
       break;
     case 'Gerar SQL de todos os vídeos de uma pasta do Vimeo para adicionar ao banco de dados':
-      // Call the function for Gerar SQL de todos os vídeos de uma pasta do Vimeo para adicionar ao banco de dados
+      getSQLfromVideos();
       break;
     case 'Criar repositórios de Mini Projetos':
-      // Call the function for Criar repositórios de Mini Projetos
+      createGithubRepos();
       break;
     case 'Gerar descrições de vídeo com ChatGPT':
       createChatGPTDescriptions();
