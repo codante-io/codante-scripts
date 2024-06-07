@@ -4,25 +4,46 @@ import ffmpeg from 'fluent-ffmpeg';
 import OpenAI from 'openai';
 import chalk from 'chalk';
 import { json2csv } from 'json-2-csv';
+import inquirer from 'inquirer';
 
-// Iniciar
-const courseDescription =  'Este é um curso em vídeos sobre server actions no Next.js. O curso é uma resolução de um mini projeto proposto.';
-
+// ALTERAR AQUI
+const courseDescription =
+  'Este é um curso em vídeos sobre server actions no Next.js. O curso é uma resolução de um mini projeto proposto.';
 const localPath = 'data/video-descriptions/'; // Pasta onde irá ficar os arquivos de áudio e transcrição.
 const videosPath =
   '/Users/robertotcestari/Movies/Codante/Mini Projetos/MP0055/editados/'; // pasta onde estão os vídeos. Recomendado usar nomes como 01.mp4, 02.mp4, 03.mp4, etc.∂
-
 let cumulativeInfoString = ''; // string que irá acumular as informações dos vídeos para ser usada no contexto do chatGPT
+// ALTERAR AQUI
 
-handle(); // start!
-// /////////////////////////////
+export async function createChatGPTDescriptions() {
+  // inquirer ask if infos are correct:
+  const questions = [
+    {
+      type: 'confirm',
+      name: 'confirm',
+      message: `Você está prestes a iniciar o script de exportação de descrições de vídeos. As informações estão corretas?`,
+    },
+  ];
+
+  console.log(chalk.blue('Descrição: ' + courseDescription));
+  console.log(chalk.blue('Pasta dos Vídeos: ' + videosPath));
+
+  await inquirer.prompt(questions).then((answers) => {
+    if (!answers.confirm) {
+      console.log('Ok, script cancelado.');
+      process.exit();
+    }
+  });
+
+  handle(); // start!
+}
 
 async function handle() {
   log('Iniciando script de exportação de descrições de vídeos...');
   const videos = await listAllVideosFromFolder(videosPath);
 
   // order videos by name (01.mov, 02.mov, 03.mov, etc)
-  videos.sort((a, b) => {
+  videos.sort((a: { name: string }, b: { name: string }): number => {
     const aName = a.name.split('.')[0];
     const bName = b.name.split('.')[0];
     return parseInt(aName) - parseInt(bName);
@@ -53,7 +74,7 @@ async function saveVideosInfo(videos: any) {
   }
 
   // order videos by name (01.mov, 02.mov, 03.mov, etc)
-  videos.sort((a, b) => {
+  videos.sort((a: any, b: any) => {
     const aName = a.filename.split('.')[0];
     const bName = b.filename.split('.')[0];
     return parseInt(aName) - parseInt(bName);
@@ -147,34 +168,16 @@ async function getVideoDescription(infoFilePath: string) {
   const infos = await hfs.json(infoFilePath);
   const videoTranscript = infos.text;
 
-  // // chamada para o chatGPT limpar e corrigir a transcrição
-  // log('Corrigindo transcrição do vídeo...');
-  // const sanitizedVideoTranscriptResponse = await openai.chat.completions.create({
-  //   model: 'gpt-4',
-  //   messages: [
-  //     {
-  //       role: 'system',
-  //       content:
-  //         `Você é um bot que corrige a transcrição de um vídeo. Vou mandar uma transcrição do vídeo em texto e você deverá devolver a transcrição corrigida. Procure por erros gramaticais, ou coisas fora do contexto. O contexto do vídeo é: ${courseDescription}`,
-  //     },
-  //     {
-  //       role: 'user',
-  //       content: videoTranscript,
-  //     },
-  //   ],
-  // });
-
-  // infos.sanitizedTranscript = sanitizedVideoTranscriptResponse.choices[0].message.content;
-
-
-
   const description = await openai.chat.completions.create({
     model: 'gpt-4o-2024-05-13',
     messages: [
       {
         role: 'system',
-        content:
-          `Você é um bot que gera descrições de vídeos. Vou mandar uma parte da transcrição do vídeo e você me dá um resumo de 30 palavras. Considere que poderá haver erros na transcrição (palavras fora de contexto e erros gramaticais). Evite superlativos (melhor, pior, mais incrível, etc) e faça a descrição na primeira pessoa do plural para falar sobre o vídeo. Também evite começar com "neste vídeo...". Outras informações sobre esse curso: ${courseDescription}. ${cumulativeInfoString ? `Aqui está um contexto dos vídeos anteriores: ${cumulativeInfoString}` : ''} `,
+        content: `Você é um bot que gera descrições de vídeos. Vou mandar uma parte da transcrição do vídeo e você me dá um resumo de 30 palavras. Considere que poderá haver erros na transcrição (palavras fora de contexto e erros gramaticais). Evite superlativos (melhor, pior, mais incrível, etc) e faça a descrição na primeira pessoa do plural para falar sobre o vídeo. Também evite começar com "neste vídeo...". Outras informações sobre esse curso: ${courseDescription}. ${
+          cumulativeInfoString
+            ? `Aqui está um contexto dos vídeos anteriores: ${cumulativeInfoString}`
+            : ''
+        } `,
       },
       {
         role: 'user',

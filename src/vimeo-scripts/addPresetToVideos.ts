@@ -16,6 +16,8 @@ export async function addPresetToVideosInFolder() {
   if (!process.env.VIMEO_TOKEN) throw new Error('VIMEO_TOKEN not found');
   if (!folderId) throw new Error('É necessário um ID da pasta do Vimeo');
 
+
+  console.log('Adicionando Preset do Codante para todos os vídeos da pasta...')
   const response = await axios.get(
     `https://api.vimeo.com/me/projects/${folderId}/videos?per_page=100`,
     {

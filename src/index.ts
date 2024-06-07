@@ -1,6 +1,7 @@
 // inquirer to select which script to run
 import inquirer from 'inquirer';
 import { addPresetToVideosInFolder } from './vimeo-scripts/addPresetToVideos';
+import { createChatGPTDescriptions } from './video-descriptions';
 
 // O que você quer fazer?
 
@@ -18,6 +19,7 @@ const questions = [
       'Add Preset do Codante para uma Pasta do Vimeo',
       'Gerar SQL de todos os vídeos de uma pasta do Vimeo para adicionar ao banco de dados',
       'Criar repositórios de Mini Projetos',
+      'Gerar descrições de vídeo com ChatGPT',
     ],
   },
 ];
@@ -31,6 +33,9 @@ inquirer.prompt(questions).then((answers) => {
       break;
     case 'Criar repositórios de Mini Projetos':
       // Call the function for Criar repositórios de Mini Projetos
+      break;
+    case 'Gerar descrições de vídeo com ChatGPT':
+      createChatGPTDescriptions();
       break;
     default:
       console.log('Invalid action');
