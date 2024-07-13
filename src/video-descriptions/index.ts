@@ -8,10 +8,10 @@ import inquirer from 'inquirer';
 
 // ALTERAR AQUI
 const courseDescription =
-  'Este é um curso em vídeos sobre server actions no Next.js. O curso é uma resolução de um mini projeto proposto.';
+  'Este é um curso sobre React Hook Form e Zod. O curso é uma resolução de um mini projeto proposto.';
 const localPath = 'data/video-descriptions/'; // Pasta onde irá ficar os arquivos de áudio e transcrição.
 const videosPath =
-  '/Users/robertotcestari/Movies/Codante/Mini Projetos/MP0055/editados/'; // pasta onde estão os vídeos. Recomendado usar nomes como 01.mp4, 02.mp4, 03.mp4, etc.∂
+  '/Users/robertotcestari/Movies/Codante Movies/Mini Projetos/MP0057/Editados/'; // pasta onde estão os vídeos. Recomendado usar nomes como 01.mp4, 02.mp4, 03.mp4, etc.∂
 let cumulativeInfoString = ''; // string que irá acumular as informações dos vídeos para ser usada no contexto do chatGPT
 // ALTERAR AQUI
 
@@ -120,7 +120,7 @@ async function exportAudioFromVideo(videoPath: string, audioPath: string) {
   function convertVideoToAudio(): Promise<void> {
     return new Promise((resolve, reject) => {
       ffmpeg(videoPath)
-        .setDuration(240)
+        // .setDuration(240)
         .output(audioPath)
         .audioBitrate(64) // lower bitrate to reduce file size
         .audioCodec('libmp3lame') // use the 'libmp3lame' codec for faster encoding
@@ -173,7 +173,7 @@ async function getVideoDescription(infoFilePath: string) {
     messages: [
       {
         role: 'system',
-        content: `Você é um bot que gera descrições de vídeos. Vou mandar uma parte da transcrição do vídeo e você me dá um resumo de 30 palavras. Considere que poderá haver erros na transcrição (palavras fora de contexto e erros gramaticais). Evite superlativos (melhor, pior, mais incrível, etc) e faça a descrição na primeira pessoa do plural para falar sobre o vídeo. Também evite começar com "neste vídeo...". Outras informações sobre esse curso: ${courseDescription}. ${
+        content: `Você irá gerar descrições de vídeos. Vou mandar uma transcrição do vídeo e você irá, de forma concisa fazer um resumo de aproximadamente 30 palavras. Evite superlativos (melhor, pior, mais incrível, etc) e faça a descrição na primeira pessoa do plural para falar sobre o vídeo. Também evite começar com "neste vídeo...". Outras informações sobre esse curso: ${courseDescription}. ${
           cumulativeInfoString
             ? `Aqui está um contexto dos vídeos anteriores: ${cumulativeInfoString}`
             : ''
@@ -189,7 +189,7 @@ async function getVideoDescription(infoFilePath: string) {
   infos.description = description.choices[0].message.content;
 
   const videoTitle = await openai.chat.completions.create({
-    model: 'gpt-4o-2024-05-13',
+    model: 'gpt-4o',
     messages: [
       {
         role: 'system',

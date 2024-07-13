@@ -4,6 +4,7 @@ import { addPresetToVideosInFolder } from './vimeo-scripts/addPresetToVideos';
 import { createChatGPTDescriptions } from './video-descriptions';
 import { getSQLfromVideos } from './vimeo-scripts/getAllVideosFromFolder';
 import { createGithubRepos } from './github-scripts/createGithubRepos';
+import { generateVideoCover } from './generate-video-cover';
 
 const questions = [
   {
@@ -15,6 +16,7 @@ const questions = [
       'Gerar SQL de todos os vídeos de uma pasta do Vimeo para adicionar ao banco de dados',
       'Criar repositórios de Mini Projetos',
       'Gerar descrições de vídeo com ChatGPT',
+      'Gerar vídeo da capa do workshop'
     ],
   },
 ];
@@ -31,6 +33,9 @@ inquirer.prompt(questions).then((answers) => {
       break;
     case 'Gerar descrições de vídeo com ChatGPT':
       createChatGPTDescriptions();
+      break;
+    case 'Gerar vídeo da capa do workshop':
+      generateVideoCover();
       break;
     default:
       console.log('Invalid action');
