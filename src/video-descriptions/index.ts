@@ -169,7 +169,7 @@ async function getVideoDescription(infoFilePath: string) {
   const videoTranscript = infos.text;
 
   const description = await openai.chat.completions.create({
-    model: 'gpt-4o-2024-05-13',
+    model: 'gpt-4o',
     messages: [
       {
         role: 'system',
