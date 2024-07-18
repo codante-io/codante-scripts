@@ -2,7 +2,7 @@ import * as hfs from 'fs/promises';
 import { GoogleGenerativeAI } from '@google/generative-ai';
 import { GoogleAIFileManager, FileState } from '@google/generative-ai/server';
 
-const prompt = 'Transcreva o áudio desse vídeo';
+const prompt = 'faça um blogpost em markdown do que esse vídeo tem de conteúdo';
 
 export async function generateGeminiDescription() {
   const folderPath = 'data/gemini-video/';
