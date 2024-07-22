@@ -1,29 +1,31 @@
 // inquirer to select which script to run
 import inquirer from 'inquirer';
+import { select } from '@inquirer/prompts';
 import { addPresetToVideosInFolder } from './vimeo-scripts/addPresetToVideos';
 import { createChatGPTDescriptions } from './video-descriptions';
 import { getSQLfromVideos } from './vimeo-scripts/getAllVideosFromFolder';
 import { createGithubRepos } from './github-scripts/createGithubRepos';
 import { generateVideoCover } from './generate-video-cover';
 import { generateGeminiDescription } from './gemini-video';
+import { getPagarmeTransactions } from './get-pagarme-transactions';
 
-const questions = [
-  {
-    type: 'list',
-    name: 'action',
-    message: 'O que você quer fazer?',
-    choices: [
-      'Add Preset do Codante para uma Pasta do Vimeo',
-      'Gerar SQL de todos os vídeos de uma pasta do Vimeo para adicionar ao banco de dados',
-      'Criar repositórios de Mini Projetos',
-      'Gerar descrições de vídeo com ChatGPT',
-      'Gerar vídeo da capa do workshop',
-      'Gerar descrição de upload de vídeo com Gemini',
-    ],
-  },
-];
-inquirer.prompt(questions).then((answers) => {
-  switch (answers.action) {
+const questions = {
+  message: 'O que você quer fazer?',
+  choices: [
+    { value: 'Add Preset do Codante para uma Pasta do Vimeo' },
+    {
+      value:
+        'Gerar SQL de todos os vídeos de uma pasta do Vimeo para adicionar ao banco de dados',
+    },
+    { value: 'Criar repositórios de Mini Projetos' },
+    { value: 'Gerar descrições de vídeo com ChatGPT' },
+    { value: 'Gerar vídeo da capa do workshop' },
+    { value: 'Gerar descrição de upload de vídeo com Gemini' },
+    { value: '[Financeiro] Pegar transações do Pagarme' },
+  ],
+};
+select(questions).then((answer) => {
+  switch (answer) {
     case 'Add Preset do Codante para uma Pasta do Vimeo':
       addPresetToVideosInFolder();
       break;
@@ -41,6 +43,9 @@ inquirer.prompt(questions).then((answers) => {
       break;
     case 'Gerar descrição de upload de vídeo com Gemini':
       generateGeminiDescription();
+      break;
+    case '[Financeiro] Pegar transações do Pagarme':
+      getPagarmeTransactions();
       break;
     default:
       console.log('Invalid action');
