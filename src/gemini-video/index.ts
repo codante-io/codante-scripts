@@ -28,6 +28,7 @@ export async function generateGeminiDescription() {
   const name = uploadResponse.file.name;
 
   let file = await fileManager.getFile(name);
+  process.stdout.write('Processando...');
   while (file.state === FileState.PROCESSING) {
     process.stdout.write('.');
     // Sleep for 10 seconds
@@ -41,7 +42,7 @@ export async function generateGeminiDescription() {
   }
 
   // When file.state is ACTIVE, the file is ready to be used for inference.
-  console.log(`File ${file.displayName} is ready for inference as ${file.uri}`);
+  console.log(`Arquivo ${file.displayName} está pronto para uso em: ${file.uri}`);
 
   const result = await model.generateContent([
     {
