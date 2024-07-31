@@ -5,6 +5,7 @@ import OpenAI from 'openai';
 import chalk from 'chalk';
 import { json2csv } from 'json-2-csv';
 import inquirer from 'inquirer';
+import Groq from 'groq-sdk';
 
 // ALTERAR AQUI
 const courseDescription =
@@ -146,11 +147,23 @@ async function exportAudioFromVideo(videoPath: string, audioPath: string) {
 async function getAudioTranscription(audioPath: string, infoFilePath: string) {
   log('Transcrevendo áudio do vídeo...');
 
+  const groq = new Groq({
+    apiKey: process.env.GROQ_API_KEY,
+  });
+
   const openai = new OpenAI();
 
-  const transcript = await openai.audio.transcriptions.create({
-    model: 'whisper-1',
+  // const transcript = await openai.audio.transcriptions.create({
+  //   model: 'whisper-1',
+  //   file: fs.createReadStream(audioPath),
+  // });
+
+  const transcript = await groq.audio.transcriptions.create({
     file: fs.createReadStream(audioPath),
+    model: 'whisper-large-v3',
+    // response_format: "json", // Optional
+    // language: "en", // Optional
+    // temperature: 0.0, // Optional
   });
 
   // now we will save the transcript to a file
@@ -169,7 +182,7 @@ async function getVideoDescription(infoFilePath: string) {
   const videoTranscript = infos.text;
 
   const description = await openai.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-4o-mini',
     messages: [
       {
         role: 'system',
@@ -189,7 +202,7 @@ async function getVideoDescription(infoFilePath: string) {
   infos.description = description.choices[0].message.content;
 
   const videoTitle = await openai.chat.completions.create({
-    model: 'gpt-4o',
+    model: 'gpt-4o-mini',
     messages: [
       {
         role: 'system',
