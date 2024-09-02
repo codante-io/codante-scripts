@@ -16,8 +16,7 @@ export async function addPresetToVideosInFolder() {
   if (!process.env.VIMEO_TOKEN) throw new Error('VIMEO_TOKEN not found');
   if (!folderId) throw new Error('É necessário um ID da pasta do Vimeo');
 
-
-  console.log('Adicionando Preset do Codante para todos os vídeos da pasta...')
+  console.log('Adicionando Preset do Codante para todos os vídeos da pasta...');
   const response = await axios.get(
     `https://api.vimeo.com/me/projects/${folderId}/videos?per_page=100`,
     {
@@ -46,5 +45,21 @@ export async function addPresetToVideosInFolder() {
 
   await Promise.all(promises);
 
-  console.log('Todos os vídeos foram atualizados com o Preset do Codante!');
+  const promises1 = videoArray.map((videoId: any) => {
+    return axios.put(
+      `https://api.vimeo.com/videos/${videoId}/privacy/domains/codante.io`,
+      {},
+      {
+        headers: {
+          Authorization: `Bearer ${process.env.VIMEO_TOKEN}`,
+        },
+      }
+    );
+  });
+
+  await Promise.all(promises1);
+
+  console.log(
+    'Todos os vídeos foram atualizados com o Preset do Codante - e adicionado o domínio codante.io'
+  );
 }

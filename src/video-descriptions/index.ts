@@ -4,37 +4,30 @@ import ffmpeg from 'fluent-ffmpeg';
 import OpenAI from 'openai';
 import chalk from 'chalk';
 import { json2csv } from 'json-2-csv';
-import inquirer from 'inquirer';
+import { confirm } from '@inquirer/prompts';
 import Groq from 'groq-sdk';
 
 // ALTERAR AQUI
 const courseDescription =
-  'Este é um curso sobre React Hook Form e Zod. O curso é uma resolução de um mini projeto proposto.';
+  'Este é um workshop sobre React. O workshop vai do básico ao intermediário de react, fazendo uma aplicação prática.';
 const localPath = 'data/video-descriptions/'; // Pasta onde irá ficar os arquivos de áudio e transcrição.
 const videosPath =
-  '/Users/robertotcestari/Movies/Codante Movies/Mini Projetos/MP0057/Editados/'; // pasta onde estão os vídeos. Recomendado usar nomes como 01.mp4, 02.mp4, 03.mp4, etc.∂
+  '/Users/robertotcestari/Movies/Codante Movies/Workshops/WS0060/aulas'; // pasta onde estão os vídeos. Recomendado usar nomes como 01.mp4, 02.mp4, 03.mp4, etc.∂
 let cumulativeInfoString = ''; // string que irá acumular as informações dos vídeos para ser usada no contexto do chatGPT
 // ALTERAR AQUI
 
 export async function createChatGPTDescriptions() {
-  // inquirer ask if infos are correct:
-  const questions = [
-    {
-      type: 'confirm',
-      name: 'confirm',
-      message: `Você está prestes a iniciar o script de exportação de descrições de vídeos. As informações estão corretas?`,
-    },
-  ];
-
   console.log(chalk.blue('Descrição: ' + courseDescription));
   console.log(chalk.blue('Pasta dos Vídeos: ' + videosPath));
 
-  await inquirer.prompt(questions).then((answers) => {
-    if (!answers.confirm) {
-      console.log('Ok, script cancelado.');
-      process.exit();
-    }
+  const answer = await confirm({
+    message:
+      'Você está prestes a iniciar o script de exportação de descrições de vídeos. As informações estão corretas?',
   });
+  if (!answer) {
+    console.log('Ok, script cancelado.');
+    process.exit();
+  }
 
   handle(); // start!
 }
@@ -50,7 +43,7 @@ async function handle() {
     return parseInt(aName) - parseInt(bName);
   });
 
-  await generateAllFiles(videos);
+  // await generateAllFiles(videos);
   await saveVideosInfo(videos);
 }
 
@@ -89,7 +82,7 @@ async function saveVideosInfo(videos: any) {
   );
 
   // save a videos.csv file too
-  const csv = await json2csv(videos);
+  const csv = json2csv(videos);
   await hfs.write('data/video-descriptions/videos.csv', csv);
 }
 
@@ -121,7 +114,6 @@ async function exportAudioFromVideo(videoPath: string, audioPath: string) {
   function convertVideoToAudio(): Promise<void> {
     return new Promise((resolve, reject) => {
       ffmpeg(videoPath)
-        // .setDuration(240)
         .output(audioPath)
         .audioBitrate(64) // lower bitrate to reduce file size
         .audioCodec('libmp3lame') // use the 'libmp3lame' codec for faster encoding
@@ -160,6 +152,7 @@ async function getAudioTranscription(audioPath: string, infoFilePath: string) {
 
   const transcript = await groq.audio.transcriptions.create({
     file: fs.createReadStream(audioPath),
+    // model: 'distil-whisper-large-v3-en',
     model: 'whisper-large-v3',
     // response_format: "json", // Optional
     // language: "en", // Optional
@@ -182,7 +175,7 @@ async function getVideoDescription(infoFilePath: string) {
   const videoTranscript = infos.text;
 
   const description = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: 'gpt-4o-2024-08-06',
     messages: [
       {
         role: 'system',
@@ -202,7 +195,7 @@ async function getVideoDescription(infoFilePath: string) {
   infos.description = description.choices[0].message.content;
 
   const videoTitle = await openai.chat.completions.create({
-    model: 'gpt-4o-mini',
+    model: 'gpt-4o-2024-08-06',
     messages: [
       {
         role: 'system',
