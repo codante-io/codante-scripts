@@ -3,11 +3,11 @@ import { handle } from './lib/createRepo';
 import inquirer from 'inquirer';
 
 export async function createGithubRepos() {
-  const REPO_NAME = 'formulario-dinamico-com-react-hook-form-e-zod'; // sem o "mp-"
+  const REPO_NAME = 'graficos-com-shadcn-e-next-js'; // sem o "mp-"
   const DESCRIPTION =
-    'Fazer um formulário na vida real nem sempre é uma tarefa trivial. Nuances como validação, mensagens de erro e máscaras de preenchimento tornam o processo um pouco menos intuitivo. Neste mini projeto, você vai aprender a criar um formulário dinâmico usando React Hook Form e Zod para facilitar o desenvolvimento.';
+    'Muitas vezes gráficos são a melhor forma de "enxergarmos" os dados. Neste mini projeto, vamos criar gráficos dinâmicos com shadcn, Next.js e Recharts.';
   const URL_DO_MINI_PROJETO =
-    'https://codante.io/mini-projetos/formulario-dinamico-com-react-hook-form-e-zod';
+    'https://codante.io/mini-projetos/graficos-com-shadcn-e-next-js';
 
   console.log(chalk.blue(`Mini Projeto ${REPO_NAME}...`));
   console.log(chalk.blue(`Descrição: ${DESCRIPTION}...`));
