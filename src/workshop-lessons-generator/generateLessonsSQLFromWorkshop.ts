@@ -1,6 +1,9 @@
 import * as fs from 'fs';
 import axios from 'axios';
 import { parse, type Workshop } from './lessonParser';
+import chalk from 'chalk';
+import { confirm } from '@inquirer/prompts';
+import { join } from 'path';
 
 /// ALTERE AQUI
 const workshopPath =
@@ -8,8 +11,22 @@ const workshopPath =
 const workshopId = 88;
 /// ALTERE AQUI
 
-const workshop = await parse(workshopPath);
-generateSql(workshop, workshopId);
+export async function generateLessonsSQLfromWorkshop() {
+  console.log(chalk.blue('WorkshopPath: ' + workshopPath));
+  console.log(chalk.blue('WorkshopID: ' + workshopId));
+
+  const answer = await confirm({
+    message:
+      'Você está prestes a iniciar o script de exportação de descrições de vídeos. As informações estão corretas?',
+  });
+  if (!answer) {
+    console.log('Ok, script cancelado.');
+    process.exit();
+  }
+
+  const workshop = await parse(workshopPath);
+  generateSql(workshop, workshopId); // start!
+}
 
 async function generateSql(workshop: Workshop, workshopID: number) {
   const filePath = 'data/workshop-lessons-generator/output.sql';
@@ -30,5 +47,6 @@ async function generateSql(workshop: Workshop, workshopID: number) {
       stream.write(sql + '\n');
     }
   }
+  console.log('Maravilha! SQL gerado com sucesso em: ' + join(filePath));
   stream.end();
 }

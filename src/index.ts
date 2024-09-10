@@ -8,6 +8,7 @@ import { createGithubRepos } from './github-scripts/createGithubRepos';
 import { generateVideoCover } from './generate-video-cover';
 import { generateGeminiDescription } from './gemini-video';
 import { getPagarmeTransactions } from './get-pagarme-transactions';
+import { generateLessonsSQLfromWorkshop } from './workshop-lessons-generator/generateLessonsSQLFromWorkshop';
 
 const questions = {
   message: 'O que você quer fazer?',
@@ -21,6 +22,7 @@ const questions = {
     { value: 'Gerar descrições de vídeo com ChatGPT' },
     { value: 'Gerar vídeo da capa do workshop' },
     { value: 'Gerar descrição de upload de vídeo com Gemini' },
+    { value: 'Gerar SQL de aulas de workshop de arquivos em markdown' },
     { value: '[Financeiro] Pegar transações do Pagarme' },
   ],
 };
@@ -43,6 +45,9 @@ select(questions).then((answer) => {
       break;
     case 'Gerar descrição de upload de vídeo com Gemini':
       generateGeminiDescription();
+      break;
+    case 'Gerar SQL de aulas de workshop de arquivos em markdown':
+      generateLessonsSQLfromWorkshop();
       break;
     case '[Financeiro] Pegar transações do Pagarme':
       getPagarmeTransactions();
