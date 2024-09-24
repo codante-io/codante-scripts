@@ -1,7 +1,6 @@
+import { confirm } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { handle } from './lib/createRepo';
-import inquirer from 'inquirer';
-import { confirm } from '@inquirer/prompts';
 
 export async function createGithubRepos() {
   const REPO_NAME = 'testes-1'; // sem o "mp-"
