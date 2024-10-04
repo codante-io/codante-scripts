@@ -67,7 +67,6 @@ export async function getSQLfromVideos() {
         for (const video of response.data.data) {
           if (!isNaN(video.name)) {
             let index = Number(video.name) - 1;            
-            
             if(index !== -1) {
               results[index]['video_url'] = video.link.replace(
                 'https://vimeo.com/',
@@ -82,14 +81,8 @@ export async function getSQLfromVideos() {
               );
               results[index]['slug'] = res.data.slug;
             }
-            
-
-           
-
-           
           }
         }
-
         generateSQL();
       })
       .catch((error) => {
