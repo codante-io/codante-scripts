@@ -66,21 +66,27 @@ export async function getSQLfromVideos() {
       .then(async (response) => {
         for (const video of response.data.data) {
           if (!isNaN(video.name)) {
-            let index = Number(video.name) - 1;
-            results[index]['video_url'] = video.link.replace(
-              'https://vimeo.com/',
-              'https://player.vimeo.com/video/'
-            );
-            results[index]['duration_in_seconds'] = video.duration;
+            let index = Number(video.name) - 1;            
+            
+            if(index !== -1) {
+              results[index]['video_url'] = video.link.replace(
+                'https://vimeo.com/',
+                'https://player.vimeo.com/video/'
+              );
+              results[index]['duration_in_seconds'] = video.duration;
+              const res = await axios.post(
+                'https://api.codante.io/api/get-unused-slug',
+                {
+                  lesson_name: results[index].name,
+                }
+              );
+              results[index]['slug'] = res.data.slug;
+            }
+            
 
-            const res = await axios.post(
-              'https://api.codante.io/api/get-unused-slug',
-              {
-                lesson_name: results[index].name,
-              }
-            );
+           
 
-            results[index]['slug'] = res.data.slug;
+           
           }
         }
 
