@@ -7,14 +7,14 @@ import { json2csv } from 'json-2-csv';
 import { confirm } from '@inquirer/prompts';
 import Groq from 'groq-sdk';
 
-// ALTERAR AQUI
+// ---------------- ALTERAR AQUI
 const courseDescription =
-  'Este é um workshop sobre React. O workshop vai do básico ao intermediário de react, fazendo uma aplicação prática.';
+  'Este é a resolução de um projeto de um SaaS hipotético com Next.js 15 e auth.js (nextauth).';
 const localPath = 'data/video-descriptions/'; // Pasta onde irá ficar os arquivos de áudio e transcrição.
 const videosPath =
-  '/Users/robertotcestari/Movies/Codante Movies/Workshops/WS0060/aulas'; // pasta onde estão os vídeos. Recomendado usar nomes como 01.mp4, 02.mp4, 03.mp4, etc.∂
+  '/Users/robertotcestari/Movies/Codante Movies/Mini Projetos/MP0068/editados/'; // pasta onde estão os vídeos. Recomendado usar nomes como 01.mp4, 02.mp4, 03.mp4, etc. A pasta deve ter um trailing slash (/) no final.
 let cumulativeInfoString = ''; // string que irá acumular as informações dos vídeos para ser usada no contexto do chatGPT
-// ALTERAR AQUI
+// ---------------- ALTERAR AQUI
 
 export async function createChatGPTDescriptions() {
   console.log(chalk.blue('Descrição: ' + courseDescription));
@@ -43,7 +43,7 @@ async function handle() {
     return parseInt(aName) - parseInt(bName);
   });
 
-  // await generateAllFiles(videos);
+  await generateAllFiles(videos);
   await saveVideosInfo(videos);
 }
 
@@ -73,8 +73,6 @@ async function saveVideosInfo(videos: any) {
     const bName = b.filename.split('.')[0];
     return parseInt(aName) - parseInt(bName);
   });
-
-  console.log(videos);
 
   await hfs.write(
     'data/video-descriptions/videos.json',

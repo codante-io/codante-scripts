@@ -3,9 +3,11 @@ import chalk from 'chalk';
 import { handle } from './lib/createRepo';
 
 export async function createGithubRepos() {
-  const REPO_NAME = 'testes-1'; // sem o "mp-"
-  const DESCRIPTION = 'Teste 1.';
-  const URL_DO_MINI_PROJETO = 'https://codante.io/mini-projetos/testes-1';
+  const REPO_NAME = 'saas-next-auth-prisma-next'; // sem o "mp-"
+  const DESCRIPTION =
+    'Vamos adicionar autenticação usando NextAuth em um SaaS de Livros de Programação. Para isso vamos usar NextAuth, Prisma e Next 15+';
+  const URL_DO_MINI_PROJETO =
+    'https://codante.io/mini-projetos/saas-next-auth-prisma-next';
 
   console.log(chalk.blue(`Mini Projeto ${REPO_NAME}...`));
   console.log(chalk.blue(`Descrição: ${DESCRIPTION}...`));
