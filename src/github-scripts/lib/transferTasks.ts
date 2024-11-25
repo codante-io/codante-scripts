@@ -1,18 +1,47 @@
 // Esse script transfere todas as tasks do github project da sprint anterior para a sprint atual
 // ATENÇÃO - VC PRECISA ESTAR NA DATA CORRETA (A ULTIMA SPRINT FECHOU, A NOVA É A PRÓXIMA.)
 
-const LAST_SPRINT_NAME = 'Sprint 85';
-const NEXT_INTERACTION = 'Sprint 86';
-// const NEXT_INTERACTION_ID = '50864559';
+import chalk from 'chalk';
+import { confirm } from '@inquirer/prompts';
 
-const TOKEN = process.env.GITHUB_TOKEN_PROJECTS;
-
-if (!TOKEN) {
-  throw new Error('Missing GITHUB_TOKEN_PROJECTS');
-}
-
+// ==== Constants ====
 const PROJECT_ID = 'PVT_kwDOB6J5TM4AN191';
 const FIELD_ID = 'PVTIF_lADOB6J5TM4AN191zgI6BRw';
+// ===================
+
+// ==== HANDLE ====
+handle();
+// ================
+
+async function handle() {
+  console.log(
+    chalk.redBright(`===== Iniciando transferência de tasks... =====`)
+  );
+  console.log(chalk.blue(`Buscando a última e a próxima sprint...`));
+  console.log(chalk.blue(`Buscando a próxima sprint...`));
+
+  const { lastSprintName, nextSprintName, nextSprintId } =
+    await fetchLastAndNextSprint();
+
+  const answer = await confirm({
+    message: `Você está prestes a transferir tasks de uma sprint para outra. As informações estão corretas? (Sprint Anterior: ${lastSprintName}, Próxima Sprint: ${nextSprintName} (${nextSprintId}))`,
+  });
+  if (!answer) {
+    console.log('Ok, script cancelado.');
+    process.exit();
+  }
+
+  const items = await fetchProjectItems(lastSprintName);
+  console.log(items);
+  for (const item of items) {
+    console.log(
+      `Moving task "${item.title?.text}" to sprint: ${nextSprintName}`
+    );
+    await moveTaskToSprint(item.id, nextSprintId);
+  }
+
+  console.log('All tasks moved successfully!');
+}
 
 interface ProjectItem {
   id: string;
@@ -37,7 +66,7 @@ interface QueryResponse {
   };
 }
 
-interface IterationQueryResponse {
+interface SprintIterationsResponse {
   data: {
     node: {
       id: string;
@@ -46,12 +75,78 @@ interface IterationQueryResponse {
           id: string;
           title: string;
         }>;
+        completedIterations: Array<{
+          id: string;
+          title: string;
+        }>;
       };
     };
   };
 }
 
-async function fetchProjectItems(): Promise<ProjectItem[]> {
+async function fetchLastAndNextSprint(): Promise<{
+  lastSprintName: string;
+  nextSprintName: string;
+  nextSprintId: string;
+}> {
+  const query = `
+    query {
+      node(id: "PVTIF_lADOB6J5TM4AN191zgI6BRw") {
+        id
+        __typename
+        ... on ProjectV2IterationField {
+          configuration {		
+            iterations{
+					    id
+					    title
+            }
+            completedIterations {
+              id
+              title
+            }
+          }
+        }
+      }
+    }
+  `;
+
+  const response = await fetch('https://api.github.com/graphql', {
+    method: 'POST',
+    headers: {
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN_PROJECTS}`,
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ query }),
+  });
+
+  const result = (await response.json()) as SprintIterationsResponse;
+  const completedIterations =
+    result.data.node.configuration.completedIterations;
+  const nextIteration = result.data.node.configuration.iterations[0];
+
+  // Sort iterations by sprint number and get the last one
+  const sortedIterations = completedIterations
+    .filter((it) => it.title.startsWith('Sprint '))
+    .sort((a, b) => {
+      const numA = parseInt(a.title.split(' ')[1]);
+      const numB = parseInt(b.title.split(' ')[1]);
+      return numA - numB;
+    });
+
+  const lastSprint = sortedIterations[sortedIterations.length - 1];
+
+  if (!lastSprint) {
+    throw new Error('No sprints found');
+  }
+
+  return {
+    lastSprintName: lastSprint.title,
+    nextSprintName: nextIteration.title,
+    nextSprintId: nextIteration.id,
+  };
+}
+
+async function fetchProjectItems(sprintName: string): Promise<ProjectItem[]> {
   let hasNextPage = true;
   let endCursor: string | null = null;
   let allItems: ProjectItem[] = [];
@@ -93,7 +188,7 @@ async function fetchProjectItems(): Promise<ProjectItem[]> {
     const response = await fetch('https://api.github.com/graphql', {
       method: 'POST',
       headers: {
-        Authorization: `Bearer ${TOKEN}`,
+        Authorization: `Bearer ${process.env.GITHUB_TOKEN_PROJECTS}`,
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ query }),
@@ -108,58 +203,14 @@ async function fetchProjectItems(): Promise<ProjectItem[]> {
   }
 
   return allItems.filter((item) => {
-    if (
-      item?.sprint?.title === LAST_SPRINT_NAME &&
-      item?.status?.name !== 'Done'
-    ) {
+    if (item?.sprint?.title === sprintName && item?.status?.name !== 'Done') {
       return item;
     }
   });
 }
 
-async function fetchIterationId(sprintTitle: string): Promise<string> {
-  const query = `
-    query {
-      node(id: "${FIELD_ID}") {
-        id
-        __typename
-        ... on ProjectV2IterationField {
-          configuration {		
-            iterations {
-              id
-              title
-            }
-          }
-        }
-      }
-    }
-  `;
-
-  const response = await fetch('https://api.github.com/graphql', {
-    method: 'POST',
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({ query }),
-  });
-
-  const result = (await response.json()) as IterationQueryResponse;
-  const iteration = result.data.node.configuration.iterations.find(
-    (it) => it.title === sprintTitle
-  );
-
-  if (!iteration) {
-    throw new Error(`Sprint "${sprintTitle}" not found`);
-  }
-
-  return iteration.id;
-}
-
-async function moveTaskToSprint(itemId: string) {
+async function moveTaskToSprint(itemId: string, sprintId: string) {
   console.log('pegando id da próxima sprint...');
-  const nextSprintId = await fetchIterationId(NEXT_INTERACTION);
-  console.log(nextSprintId);
 
   console.log(itemId);
   const mutation = `
@@ -169,7 +220,7 @@ async function moveTaskToSprint(itemId: string) {
         itemId: "${itemId}"
         fieldId: "${FIELD_ID}"
         value: {
-          iterationId: "${await fetchIterationId(NEXT_INTERACTION)}"
+          iterationId: "${sprintId}"
         }
       }) {
         clientMutationId
@@ -180,7 +231,7 @@ async function moveTaskToSprint(itemId: string) {
   const response = await fetch('https://api.github.com/graphql', {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${TOKEN}`,
+      Authorization: `Bearer ${process.env.GITHUB_TOKEN_PROJECTS}`,
       'Content-Type': 'application/json',
     },
     body: JSON.stringify({ query: mutation }),
@@ -188,14 +239,3 @@ async function moveTaskToSprint(itemId: string) {
 
   return await response.json();
 }
-
-const items = await fetchProjectItems();
-console.log(items);
-for (const item of items) {
-  console.log(
-    `Moving task "${item.title?.text}" to sprint: ${NEXT_INTERACTION}`
-  );
-  await moveTaskToSprint(item.id);
-}
-
-console.log('All tasks moved successfully!');
