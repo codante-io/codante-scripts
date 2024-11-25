@@ -1,9 +1,9 @@
 import axios from 'axios';
 
-async function renameFilesOneOff() {
-  const VIMEO_FOLDER_ID = '22002683';
-  const VIMEO_TOKEN = process.env.VIMEO_TOKEN;
+const VIMEO_FOLDER_ID = '22917241';
+const VIMEO_TOKEN = process.env.VIMEO_TOKEN;
 
+async function renameFilesOneOff() {
   // get all videos from vimeo folder:
   // https://api.vimeo.com/me/projects/22002683/videos?per_page=100
 
@@ -20,7 +20,7 @@ async function renameFilesOneOff() {
 
   for (const video of videos) {
     console.log(video.name);
-    const newName = video.name.split('.')[0];
+    const newName = video.name.split('-')[0];
 
     // rename video
     await axios.patch(
@@ -38,7 +38,7 @@ async function renameFilesOneOff() {
 }
 
 async function domainOneoff() {
-  const VIMEO_FOLDER_ID = '22002683';
+  const VIMEO_FOLDER_ID = '22917241';
   const VIMEO_TOKEN = process.env.VIMEO_TOKEN;
 
   // get all videos from vimeo folder:
@@ -77,4 +77,4 @@ async function domainOneoff() {
   }
 }
 
-await domainOneoff();
+await renameFilesOneOff();
