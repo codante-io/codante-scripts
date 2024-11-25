@@ -10,10 +10,10 @@ const FIELD_ID = 'PVTIF_lADOB6J5TM4AN191zgI6BRw';
 // ===================
 
 // ==== HANDLE ====
-handle();
+handleTransferTasks();
 // ================
 
-async function handle() {
+export async function handleTransferTasks() {
   console.log(
     chalk.redBright(`===== Iniciando transferência de tasks... =====`)
   );
