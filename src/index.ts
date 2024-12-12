@@ -8,12 +8,15 @@ import { createGithubRepos } from './github-scripts/createGithubRepos';
 import { generateVideoCover } from './generate-video-cover';
 import { generateGeminiDescription } from './gemini-video';
 import { getPagarmeTransactions } from './get-pagarme-transactions';
+import { createNewVimeoFolder } from './vimeo-scripts/createVimeoFolder';
 import { generateLessonsSQLfromWorkshop } from './workshop-lessons-generator/generateLessonsSQLFromWorkshop';
+import { handleTransferTasks } from './github-scripts/lib/transferTasks';
 
 const questions = {
   message: 'O que você quer fazer?',
   choices: [
     { value: 'Add Preset do Codante para uma Pasta do Vimeo' },
+    { value: 'Criar uma nova pasta no Vimeo' },
     {
       value:
         'Gerar SQL de todos os vídeos de uma pasta do Vimeo para adicionar ao banco de dados',
@@ -22,14 +25,17 @@ const questions = {
     { value: 'Gerar descrições de vídeo com ChatGPT' },
     { value: 'Gerar vídeo da capa do workshop' },
     { value: 'Gerar descrição de upload de vídeo com Gemini' },
-    { value: 'Gerar SQL de aulas de workshop de arquivos em markdown' },
     { value: '[Financeiro] Pegar transações do Pagarme' },
+    { value: 'Transferir tasks da última sprint para próxima sprint' },
   ],
 };
 select(questions).then((answer) => {
   switch (answer) {
     case 'Add Preset do Codante para uma Pasta do Vimeo':
       addPresetToVideosInFolder();
+      break;
+    case 'Criar uma nova pasta no Vimeo':
+      createNewVimeoFolder();
       break;
     case 'Gerar SQL de todos os vídeos de uma pasta do Vimeo para adicionar ao banco de dados':
       getSQLfromVideos();
@@ -51,6 +57,9 @@ select(questions).then((answer) => {
       break;
     case '[Financeiro] Pegar transações do Pagarme':
       getPagarmeTransactions();
+      break;
+    case 'Transferir tasks da última sprint para próxima sprint':
+      handleTransferTasks();
       break;
     default:
       console.log('Invalid action');

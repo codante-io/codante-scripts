@@ -23,7 +23,7 @@ async function createRepoFromTemplate(octokit: Octokit, name: string) {
     template_repo: 'mp-template',
     owner: 'codante-io',
     name,
-    private: true,
+    private: false,
     include_all_branches: false,
   });
 
@@ -44,7 +44,7 @@ async function updateRepo(
     org: 'codante-io',
     description,
     homepage,
-    private: true,
+    private: false,
     has_issues: false,
     has_projects: false,
     has_wiki: false,
