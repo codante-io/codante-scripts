@@ -9,10 +9,10 @@ import Groq from 'groq-sdk';
 
 // ---------------- ALTERAR AQUI
 const courseDescription =
-  'Este é a resolução de um projeto de um SaaS hipotético com Next.js 15 e auth.js (nextauth).';
+  'Esse é um workshop sobre react para iniciantes';
 const localPath = 'data/video-descriptions/'; // Pasta onde irá ficar os arquivos de áudio e transcrição.
 const videosPath =
-  '/Users/robertotcestari/Movies/Codante Movies/Mini Projetos/MP0068/editados/'; // pasta onde estão os vídeos. Recomendado usar nomes como 01.mp4, 02.mp4, 03.mp4, etc. A pasta deve ter um trailing slash (/) no final.
+  '/Users/carolsilva/codante/workshop-videos/react-parte-1/'; // pasta onde estão os vídeos. Recomendado usar nomes como 01.mp4, 02.mp4, 03.mp4, etc. A pasta deve ter um trailing slash (/) no final.
 let cumulativeInfoString = ''; // string que irá acumular as informações dos vídeos para ser usada no contexto do chatGPT
 // ---------------- ALTERAR AQUI
 
@@ -43,8 +43,13 @@ async function handle() {
     return parseInt(aName) - parseInt(bName);
   });
 
-  await generateAllFiles(videos);
-  await saveVideosInfo(videos);
+  const startFromVideo37 = videos.filter((video: { name: string }) => {
+    const videoNumber = parseInt(video.name.split('.')[0]);
+    return videoNumber >= 37;  // Começa a partir do vídeo 37
+  });
+
+  await generateAllFiles(startFromVideo37);
+  await saveVideosInfo(startFromVideo37);
 }
 
 async function saveVideosInfo(videos: any) {
