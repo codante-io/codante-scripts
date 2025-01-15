@@ -61,7 +61,6 @@ export async function getSQLfromVideos() {
       });
   }
 
-
   function getAllVideosFromFolder(folderId: string | number) {
     axios
       .get(

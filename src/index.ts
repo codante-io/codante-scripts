@@ -26,7 +26,7 @@ const questions = {
     { value: 'Gerar vídeo da capa do workshop' },
     { value: 'Gerar descrição de upload de vídeo com Gemini' },
     { value: '[Financeiro] Pegar transações do Pagarme' },
-    { value: 'Transferir tasks da última sprint para próxima sprint' },
+    // { value: 'Transferir tasks da última sprint para próxima sprint' },
   ],
 };
 select(questions).then((answer) => {
@@ -58,9 +58,9 @@ select(questions).then((answer) => {
     case '[Financeiro] Pegar transações do Pagarme':
       getPagarmeTransactions();
       break;
-    case 'Transferir tasks da última sprint para próxima sprint':
-      handleTransferTasks();
-      break;
+    // case 'Transferir tasks da última sprint para próxima sprint':
+    //   handleTransferTasks();
+    //   break;
     default:
       console.log('Invalid action');
       break;
