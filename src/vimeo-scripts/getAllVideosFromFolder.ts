@@ -103,6 +103,7 @@ export async function getSQLfromVideos() {
   }
 
   function generateSQL() {
+    let sqlStatements = '';
 
     results.map((result) => {
       const sql =
@@ -110,6 +111,9 @@ export async function getSQLfromVideos() {
           '"',
           '`'
         );
+        sqlStatements += sql + '\n';
     });
+    fs.writeFileSync('output.sql', sqlStatements, 'utf-8');
+    console.log('SQL gerado e salvo em "output.sql"');
   }
 }
