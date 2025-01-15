@@ -43,9 +43,8 @@ async function generateSql(workshop: Workshop, workshopID: number) {
 
       const slug = slugRes.data.slug;
 
-      const sql = `INSERT INTO lessons (lessonable_id, name, type, description, available_to, slug, position, created_at, updated_at, section) VALUES (${workshopID},  '${lesson.name}', '${lesson.content}', 'pro', '${slug}', ${lesson.order}, NOW(), NOW(), '${section.name}');`;
-      console.log(sql)
-      // stream.write(sql + '\n');
+      const sql = `INSERT INTO lessons (workshop_id, name, content, available_to, slug, position, created_at, updated_at, section) VALUES (${workshopID},  '${lesson.name}', '${lesson.content}', 'pro', '${slug}', ${lesson.order}, NOW(), NOW(), '${section.name}');`;
+      stream.write(sql + '\n');
     }
   }
   console.log('Maravilha! SQL gerado com sucesso em: ' + join(filePath));
