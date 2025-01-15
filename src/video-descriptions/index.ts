@@ -43,13 +43,14 @@ async function handle() {
     return parseInt(aName) - parseInt(bName);
   });
 
-  const startFromVideo37 = videos.filter((video: { name: string }) => {
-    const videoNumber = parseInt(video.name.split('.')[0]);
-    return videoNumber >= 37;  // Começa a partir do vídeo 37
-  });
+  //Caso o serviço interrompa em alguma parte
+  // const startFromVideo37 = videos.filter((video: { name: string }) => {
+  //   const videoNumber = parseInt(video.name.split('.')[0]);
+  //   return videoNumber >= 37;  // Começa a partir do vídeo 37
+  // });
 
-  await generateAllFiles(startFromVideo37);
-  await saveVideosInfo(startFromVideo37);
+  await generateAllFiles(videos);
+  await saveVideosInfo(videos);
 }
 
 async function saveVideosInfo(videos: any) {
