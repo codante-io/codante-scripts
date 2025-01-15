@@ -14,7 +14,13 @@ export async function getSQLfromVideos() {
     {
       type: 'input',
       name: 'workshopId',
-      message: 'Qual o ID do Workshop?',
+      message: 'Qual o ID do Workshop ou Mini projeto?',
+    },
+    {
+      type: 'list',
+      name: 'option',
+      message: 'Escolha uma opção:',
+      choices: ['Workshop', 'Mini Projeto']
     },
     {
       type: 'confirm',
@@ -27,6 +33,8 @@ export async function getSQLfromVideos() {
   const folderId = answers.folderId;
   const workshopId = answers.workshopId;
   const VIMEO_TOKEN = process.env.VIMEO_TOKEN;
+  const option = answers.option;
+  
 
   if (!VIMEO_TOKEN) throw new Error('VIMEO_TOKEN not found in .env file');
   if (!folderId) throw new Error('VIMEO_FOLDER_ID not found ');
@@ -52,6 +60,7 @@ export async function getSQLfromVideos() {
         callback();
       });
   }
+
 
   function getAllVideosFromFolder(folderId: string | number) {
     axios
@@ -79,8 +88,10 @@ export async function getSQLfromVideos() {
                 lesson_name: results[index].name,
               }
             );
-
+            
             results[index]['slug'] = res.data.slug;
+            results[index]['lessonable_type'] = option === 'Mini Projeto' ? 'App\\\\Models\\\\Challenge' : 'App\\\\Models\\\\Workshop';
+
           }
         }
 
@@ -92,13 +103,17 @@ export async function getSQLfromVideos() {
   }
 
   function generateSQL() {
+    let sqlStatements = '';
+
     results.map((result) => {
       const sql =
-        `INSERT INTO "lessons" ("workshop_id", "name", "description", "video_url", "duration_in_seconds", "slug", "created_at", "updated_at") values (${workshopId}, '${result.name}', '${result.description}', '${result.video_url}', ${result.duration_in_seconds}, '${result.slug}', NOW(), NOW() );`.replaceAll(
+        `INSERT INTO "lessons" ("lessonable_id", "lessonable_type", "name", "description", "video_url",  "available_to", "duration_in_seconds", "slug", "created_at", "updated_at") values (${workshopId}, '${result.lessonable_type}', '${result.name}', '${result.description}', '${result.video_url}', 'pro', '${result.duration_in_seconds}', '${result.slug}', NOW(), NOW());`.replaceAll(
           '"',
           '`'
         );
-      console.log(sql);
+        sqlStatements += sql + '\n';
     });
+    fs.writeFileSync('output.sql', sqlStatements, 'utf-8');
+    console.log('SQL gerado e salvo em "output.sql"');
   }
 }
