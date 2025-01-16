@@ -1,6 +1,5 @@
 // inquirer to select which script to run
 import inquirer from 'inquirer';
-
 import { select } from '@inquirer/prompts';
 import { addPresetToVideosInFolder } from './vimeo-scripts/addPresetToVideos';
 import { createChatGPTDescriptions } from './video-descriptions';
