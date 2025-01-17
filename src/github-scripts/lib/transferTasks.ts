@@ -9,10 +9,6 @@ const PROJECT_ID = 'PVT_kwDOB6J5TM4AN191';
 const FIELD_ID = 'PVTIF_lADOB6J5TM4AN191zgI6BRw';
 // ===================
 
-// ==== HANDLE ====
-handleTransferTasks();
-// ================
-
 export async function handleTransferTasks() {
   console.log(
     chalk.redBright(`===== Iniciando transferência de tasks... =====`)
@@ -84,11 +80,13 @@ interface SprintIterationsResponse {
   };
 }
 
-async function fetchLastAndNextSprint(): Promise<{
+type NextAndLastSprint = {
   lastSprintName: string;
   nextSprintName: string;
   nextSprintId: string;
-}> {
+};
+
+async function fetchLastAndNextSprint(): Promise<NextAndLastSprint> {
   const query = `
     query {
       node(id: "PVTIF_lADOB6J5TM4AN191zgI6BRw") {

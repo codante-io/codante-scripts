@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const VIMEO_FOLDER_ID = '22917241';
+const VIMEO_FOLDER_ID = '23342589';
 const VIMEO_TOKEN = process.env.VIMEO_TOKEN;
 
 async function renameFilesOneOff() {
@@ -23,7 +23,7 @@ async function renameFilesOneOff() {
     const newName = video.name.split('-')[0];
 
     // rename video
-    await axios.patch(
+    const res = await axios.patch(
       `https://api.vimeo.com/videos/${video.uri.split('/')[2]}`,
       {
         name: newName,
@@ -34,6 +34,8 @@ async function renameFilesOneOff() {
         },
       }
     );
+
+    console.log(res.data);
   }
 }
 
