@@ -1,23 +1,43 @@
-import { confirm } from '@inquirer/prompts';
 import chalk from 'chalk';
 import { handle } from './lib/createRepo';
+import inquirer from "inquirer";
 
 export async function createGithubRepos() {
-  const REPO_NAME = 'saas-next-auth-prisma-next'; // sem o "mp-"
-  const DESCRIPTION =
-    'Vamos adicionar autenticação usando NextAuth em um SaaS de Livros de Programação. Para isso vamos usar NextAuth, Prisma e Next 15+';
-  const URL_DO_MINI_PROJETO =
-    'https://codante.io/mini-projetos/saas-next-auth-prisma-next';
+
+  const questions = [
+    {
+      type: "input",
+      name: "repoName",
+      message: "Qual o nome do repositório? Sem MP, exemplo: saas-com-next",
+    },
+    {
+      type: "input",
+      name: "description",
+      message: "Qual a descrição?",
+    },
+    {
+      type: "input",
+      name: "urlMp",
+      message: "Qual a url ? Exemplo: saas-com-next",
+    },
+    {
+      type: "confirm",
+      name: "confirmQuestions",
+      message: `Você está prestes a iniciar o script de criação de repositórios. Deseja continuar ?`,
+    },
+  ]
+
+  const answers = await inquirer.prompt(questions);
+  const REPO_NAME = answers.repoName; 
+  const DESCRIPTION = answers.description;
+  const URL_DO_MINI_PROJETO = answers.urlMp;
 
   console.log(chalk.blue(`Mini Projeto ${REPO_NAME}...`));
   console.log(chalk.blue(`Descrição: ${DESCRIPTION}...`));
   console.log(chalk.blue(`URL: ${URL_DO_MINI_PROJETO}...`));
 
-  const answer = await confirm({
-    message:
-      'Você está prestes a iniciar o script de criação de repos no Github. As informações estão corretas?',
-  });
-  if (!answer) {
+
+  if (!answers.confirmQuestions) {
     console.log('Ok, script cancelado.');
     process.exit();
   }
