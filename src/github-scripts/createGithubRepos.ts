@@ -17,7 +17,7 @@ export async function createGithubRepos() {
     {
       type: "input",
       name: "urlMp",
-      message: "Qual a url ? Exemplo: saas-com-next",
+      message: "Qual o slug da url ? Exemplo: saas-com-next",
     },
     {
       type: "confirm",
