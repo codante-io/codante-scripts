@@ -27,7 +27,7 @@ export async function createGithubRepos() {
   ]
 
   const answers = await inquirer.prompt(questions);
-  const REPO_NAME = answers.repoName; 
+  const REPO_NAME = answers.repoSlug; 
   const DESCRIPTION = answers.description;
   const URL_DO_MINI_PROJETO = answers.urlMp;
 
