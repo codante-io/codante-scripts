@@ -6,7 +6,7 @@ export async function createGithubRepos() {
   const questions = [
     {
       type: "input",
-      name: "repoName",
+      name: "repoSlug",
       message: "Qual o nome do repositório? Sem MP, exemplo: saas-com-next",
     },
     {
