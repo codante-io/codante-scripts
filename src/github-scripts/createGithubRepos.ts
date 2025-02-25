@@ -7,7 +7,7 @@ export async function createGithubRepos() {
     {
       type: "input",
       name: "repoSlug",
-      message: "Qual o nome do repositório? Sem MP, exemplo: saas-com-next",
+      message: "Qual o slug do repositório? Sem o 'prefixo' `mp`. Exemplo: saas-com-next",
     },
     {
       type: "input",
