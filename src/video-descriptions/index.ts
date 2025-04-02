@@ -8,11 +8,38 @@ import { confirm } from '@inquirer/prompts';
 import Groq from 'groq-sdk';
 
 // ---------------- ALTERAR AQUI
-const courseDescription =
-  'Esse é um workshop sobre react para iniciantes';
+const courseDescription = `Esse é um workshop de TailwindCSS avançado para desenvolvedores web. os temas são esses: Boas-vindas!
+O que vamos aprender
+Para quem é esse workshop
+Links Úteis
+Quem sou eu?
+group-*
+peer-*
+has-*
+Comparação entre group, peer, in e has
+Valores, Propriedades e Variantes arbitrários
+Classes que fazem mágica
+Regra Essencial do Tailwind CSS
+Por trás dos panos
+Diretivas no Tailwind
+Diretiva @theme
+Outras Diretivas
+Funções
+Dark Mode
+Transições
+Animações
+Componentes prontos com Animações
+Plugins no Tailwindcss
+Forms
+Tipografia
+Headless Componentes
+tailwind-merge
+cn() do shadcn
+CVA - Class Variance Authority
+`;
 const localPath = 'data/video-descriptions/'; // Pasta onde irá ficar os arquivos de áudio e transcrição.
 const videosPath =
-  '/Users/carolsilva/codante/workshop-videos/react-parte-1/'; // pasta onde estão os vídeos. Recomendado usar nomes como 01.mp4, 02.mp4, 03.mp4, etc. A pasta deve ter um trailing slash (/) no final.
+  '/Volumes/codante/em-edicao/WS00XX - Tailwind Avancado/editados/'; // pasta onde estão os vídeos. Recomendado usar nomes como 01.mp4, 02.mp4, 03.mp4, etc. A pasta deve ter um trailing slash (/) no final.
 let cumulativeInfoString = ''; // string que irá acumular as informações dos vídeos para ser usada no contexto do chatGPT
 // ---------------- ALTERAR AQUI
 
@@ -91,6 +118,7 @@ async function saveVideosInfo(videos: any) {
 }
 
 async function generateAllFiles(videos: any[]) {
+  // First, handle all transcriptions
   for (const video of videos) {
     const videoPath = videosPath + video.name;
     const audioPath =
@@ -98,16 +126,107 @@ async function generateAllFiles(videos: any[]) {
     const infoFilePath =
       localPath + video.name.replace('.mov', '.json').replace('.mp4', '.json');
 
-    // first, we will export just the audio from video files
-    await exportAudioFromVideo(videoPath, audioPath);
-    // // then, we will upload the audio to openai to generate the video description
-    await getAudioTranscription(audioPath, infoFilePath);
-    // // finally, we will upload the video description to chatGPT to ask for a summary.
-    await getVideoDescription(infoFilePath);
+    // Skip if video is already processed
+    if (await isVideoProcessed(audioPath, infoFilePath)) {
+      log(`Skipping ${video.name} - already processed`);
+      continue;
+    }
 
-    // add the video description to the cumulativeInfoString
+    // Export audio and get transcription
+    await exportAudioFromVideo(videoPath, audioPath);
+    await getAudioTranscription(audioPath, infoFilePath);
+  }
+
+  // After all transcriptions are done, generate descriptions in batch
+  await generateBatchDescriptions(videos);
+}
+
+async function generateBatchDescriptions(videos: any[]) {
+  log('Gerando descrições em lote...');
+
+  // Collect all transcriptions
+  const transcriptions = [];
+  for (const video of videos) {
+    const infoFilePath =
+      localPath + video.name.replace('.mov', '.json').replace('.mp4', '.json');
     const infos = await hfs.json(infoFilePath);
-    cumulativeInfoString += infos.description + ' ';
+    transcriptions.push({
+      filename: video.name,
+      transcription: infos.text,
+    });
+  }
+
+  const openai = new OpenAI();
+
+  // Generate descriptions for all videos at once
+  const descriptions = await openai.chat.completions.create({
+    // model: 'o3-mini',
+    model: 'gpt-4o-mini',
+    messages: [
+      {
+        role: 'system',
+        content: `Você irá gerar descrições de vídeos. Vou as transcrições e você irá, para cada uma, gerar um título e uma descrição concisa de aproximadamente 30 palavras. 
+        
+        - Evite superlativos (melhor, pior, mais incrível, etc) 
+        - Faça as descrições na primeira pessoa do plural. 
+        - Evite começar com "neste vídeo...". 
+        - A primeira letra da primeira palavra do título deve ser maiúscula. Todas as outras letras do título devem ser minúsculas.
+        - O título deve ser curto, de 1 a 10 palavras.
+        - Nas descrições, utilize termos de programação entre crases.
+        - Evite descrições com inícios iguais "nós vamos...", etc.
+        Outras informações sobre esse curso: ${courseDescription}. 
+        
+        - Retorne um JSON com o seguinte formato:
+        {
+          "videos": [
+            {
+              "filename": "nome do arquivo",
+              "title": "título do vídeo",
+              "description": "descrição do vídeo"
+            }
+          ]
+        }`,
+      },
+      {
+        role: 'user',
+        content: JSON.stringify(transcriptions),
+      },
+    ],
+    response_format: { type: 'json_object' },
+  });
+
+  const result = JSON.parse(descriptions.choices[0].message.content || '{}');
+
+  // Update all info files with the generated descriptions
+  for (const video of result.videos) {
+    const infoFilePath =
+      localPath +
+      video.filename.replace('.mov', '.json').replace('.mp4', '.json');
+    const infos = await hfs.json(infoFilePath);
+    infos.videoTitle = video.title;
+    infos.description = video.description;
+    await hfs.write(infoFilePath, JSON.stringify(infos));
+  }
+}
+
+async function isVideoProcessed(
+  audioPath: string,
+  infoFilePath: string
+): Promise<boolean> {
+  try {
+    // Check if both audio and JSON files exist
+    const audioExists = fs.existsSync(audioPath);
+    const jsonExists = fs.existsSync(infoFilePath);
+
+    if (!audioExists || !jsonExists) {
+      return false;
+    }
+
+    // Check if JSON file has the required fields
+    const jsonContent = await hfs.json(infoFilePath);
+    return jsonContent.description && jsonContent.videoTitle;
+  } catch (error) {
+    return false;
   }
 }
 
@@ -157,7 +276,7 @@ async function getAudioTranscription(audioPath: string, infoFilePath: string) {
   const transcript = await groq.audio.transcriptions.create({
     file: fs.createReadStream(audioPath),
     // model: 'distil-whisper-large-v3-en',
-    model: 'whisper-large-v3',
+    model: 'whisper-large-v3-turbo',
     // response_format: "json", // Optional
     // language: "en", // Optional
     // temperature: 0.0, // Optional
@@ -179,7 +298,8 @@ async function getVideoDescription(infoFilePath: string) {
   const videoTranscript = infos.text;
 
   const description = await openai.chat.completions.create({
-    model: 'gpt-4o-2024-08-06',
+    model: 'o3-mini',
+    // model: 'gpt-4o-2024-08-06',
     messages: [
       {
         role: 'system',
@@ -199,7 +319,8 @@ async function getVideoDescription(infoFilePath: string) {
   infos.description = description.choices[0].message.content;
 
   const videoTitle = await openai.chat.completions.create({
-    model: 'gpt-4o-2024-08-06',
+    // model: 'gpt-4o-2024-08-06',
+    model: 'o3-mini',
     messages: [
       {
         role: 'system',
