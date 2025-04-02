@@ -40,6 +40,7 @@ export async function generateVideoCover() {
     'https://screenshot-service.codante.io/vimeo-video-thumbnail',
     {
       vimeoID,
+      startTime,
     },
     {
       headers: {
